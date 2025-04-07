@@ -45,12 +45,25 @@
             android:maxLines="2"
             android:ellipsize="end"/>
 
-        <Button
-            android:id="@+id/deleteButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
             android:layout_marginTop="8dp"
-            android:text="Delete" />
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/editButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

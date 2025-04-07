@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskClickListener {
 
     private EditText titleEditText, descriptionEditText;
     private TextView selectedDateTextView;
@@ -44,28 +44,13 @@ public class MainActivity extends AppCompatActivity {
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
 
         // Setup RecyclerView
-        setupRecyclerView();
+        taskAdapter = new TaskAdapter(taskList, this, this);
+        tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        tasksRecyclerView.setAdapter(taskAdapter);
 
         // Set up button click listeners
         datePickerButton.setOnClickListener(v -> showDatePickerDialog());
         createNewTaskButton.setOnClickListener(v -> createNewTask());
-    }
-
-    private void setupRecyclerView() {
-        taskAdapter = new TaskAdapter(taskList, new TaskAdapter.OnTaskClickListener() {
-            @Override
-            public void onTaskClick(Task task) {
-                showTaskDetails(task);
-            }
-
-            @Override
-            public void onDeleteClick(Task task) {
-                deleteTask(task);
-            }
-        });
-
-        tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        tasksRecyclerView.setAdapter(taskAdapter);
     }
 
     private void showDatePickerDialog() {
@@ -105,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         Task newTask = new Task(title, description, selectedDate.getTime());
         taskList.add(newTask);
-        taskAdapter.notifyDataSetChanged();
+        taskAdapter.notifyItemInserted(taskList.size() - 1);
 
         clearInputFields();
         showToast("Task created successfully");
@@ -118,7 +103,12 @@ public class MainActivity extends AppCompatActivity {
         selectedDateTextView.setText("No date selected");
     }
 
-    private void showTaskDetails(Task task) {
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTaskClick(Task task) {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
         String message = String.format("Task: %s\nDescription: %s\nDue: %s",
                 task.getTitle(),
@@ -127,20 +117,23 @@ public class MainActivity extends AppCompatActivity {
         showToast(message);
     }
 
-    private void deleteTask(Task task) {
+    @Override
+    public void onDeleteClick(Task task) {
+        int position = taskList.indexOf(task);
         taskList.remove(task);
-        taskAdapter.notifyDataSetChanged();
+        taskAdapter.notifyItemRemoved(position);
         showToast("Task deleted");
     }
 
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    @Override
+    public void onEditClick(Task task, int position) {
+        showToast("Task updated");
     }
 
     public static class Task {
-        private final String title;
-        private final String description;
-        private final Date dueDate;
+        private String title;
+        private String description;
+        private Date dueDate;
 
         public Task(String title, String description, Date dueDate) {
             this.title = title;
@@ -151,5 +144,9 @@ public class MainActivity extends AppCompatActivity {
         public String getTitle() { return title; }
         public String getDescription() { return description; }
         public Date getDueDate() { return dueDate; }
+
+        public void setTitle(String title) { this.title = title; }
+        public void setDescription(String description) { this.description = description; }
+        public void setDueDate(Date dueDate) { this.dueDate = dueDate; }
     }
 }
