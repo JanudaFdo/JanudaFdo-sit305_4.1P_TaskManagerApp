@@ -1,3 +1,5 @@
+package com.example.sit305_41p__taskmanagerapp;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +15,8 @@ import java.util.Locale;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-    private List<MainActivity.Task> taskList;
-    private OnTaskClickListener listener;
+    private final List<MainActivity.Task> taskList;
+    private final OnTaskClickListener listener;
 
     public interface OnTaskClickListener {
         void onTaskClick(MainActivity.Task task);
@@ -36,8 +38,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        MainActivity.Task task = taskList.get(position);
-        holder.bind(task, listener);
+        holder.bind(taskList.get(position), listener);
     }
 
     @Override
@@ -46,35 +47,32 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
-        private TextView titleTextView;
-        private TextView dueDateTextView;
-        private Button deleteButton;
+        private final TextView titleTextView;
+        private final TextView dueDateTextView;
+        private final TextView descriptionTextView;
+        private final Button deleteButton;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             titleTextView = itemView.findViewById(R.id.taskTitle);
             dueDateTextView = itemView.findViewById(R.id.taskDueDate);
+            descriptionTextView = itemView.findViewById(R.id.taskDescription);
             deleteButton = itemView.findViewById(R.id.deleteButton);
         }
 
         public void bind(final MainActivity.Task task, final OnTaskClickListener listener) {
             titleTextView.setText(task.getTitle());
+
+            // Format and display due date
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
             dueDateTextView.setText(sdf.format(task.getDueDate()));
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onTaskClick(task);
-                }
-            });
+            // Display description (show "No description" if empty)
+            String description = task.getDescription();
+            descriptionTextView.setText(description.isEmpty() ? "No description" : description);
 
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onDeleteClick(task);
-                }
-            });
+            itemView.setOnClickListener(v -> listener.onTaskClick(task));
+            deleteButton.setOnClickListener(v -> listener.onDeleteClick(task));
         }
     }
 }

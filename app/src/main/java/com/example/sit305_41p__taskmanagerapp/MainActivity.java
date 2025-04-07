@@ -1,3 +1,5 @@
+package com.example.sit305_41p__taskmanagerapp;
+
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
@@ -26,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView tasksRecyclerView;
     private TaskAdapter taskAdapter;
     private List<Task> taskList = new ArrayList<>();
-
     private Calendar selectedDate = Calendar.getInstance();
 
     @Override
@@ -43,55 +44,44 @@ public class MainActivity extends AppCompatActivity {
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
 
         // Setup RecyclerView
+        setupRecyclerView();
+
+        // Set up button click listeners
+        datePickerButton.setOnClickListener(v -> showDatePickerDialog());
+        createNewTaskButton.setOnClickListener(v -> createNewTask());
+    }
+
+    private void setupRecyclerView() {
         taskAdapter = new TaskAdapter(taskList, new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task) {
-                // Handle task click (edit/view)
                 showTaskDetails(task);
             }
 
             @Override
             public void onDeleteClick(Task task) {
-                // Handle delete
                 deleteTask(task);
             }
         });
 
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
-
-        // Date picker button click listener
-        datePickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
-
-        // Create new task button click listener
-        createNewTaskButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createNewTask();
-            }
-        });
     }
 
     private void showDatePickerDialog() {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        selectedDate.set(year, month, dayOfMonth);
-                        updateSelectedDateText();
-                    }
-                },
+                this::onDateSet,
                 selectedDate.get(Calendar.YEAR),
                 selectedDate.get(Calendar.MONTH),
                 selectedDate.get(Calendar.DAY_OF_MONTH)
         );
         datePickerDialog.show();
+    }
+
+    private void onDateSet(DatePicker view, int year, int month, int day) {
+        selectedDate.set(year, month, day);
+        updateSelectedDateText();
     }
 
     private void updateSelectedDateText() {
@@ -104,54 +94,53 @@ public class MainActivity extends AppCompatActivity {
         String description = descriptionEditText.getText().toString().trim();
 
         if (title.isEmpty()) {
-            Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show();
+            showToast("Please enter a title");
             return;
         }
 
         if (selectedDateTextView.getText().toString().equals("No date selected")) {
-            Toast.makeText(this, "Please select a due date", Toast.LENGTH_SHORT).show();
+            showToast("Please select a due date");
             return;
         }
 
-        // Create new task
-        Task newTask = new Task(
-                title,
-                description,
-                selectedDate.getTime()
-        );
-
-        // Add to list and update RecyclerView
+        Task newTask = new Task(title, description, selectedDate.getTime());
         taskList.add(newTask);
         taskAdapter.notifyDataSetChanged();
 
-        // Clear input fields
+        clearInputFields();
+        showToast("Task created successfully");
+    }
+
+    private void clearInputFields() {
         titleEditText.setText("");
         descriptionEditText.setText("");
         selectedDate = Calendar.getInstance();
         selectedDateTextView.setText("No date selected");
-
-        Toast.makeText(this, "Task created successfully", Toast.LENGTH_SHORT).show();
     }
 
     private void showTaskDetails(Task task) {
-        // In a real app, you might open a new activity or show a dialog
-        Toast.makeText(this,
-                "Task: " + task.getTitle() +
-                        "\nDue: " + new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(task.getDueDate()),
-                Toast.LENGTH_LONG).show();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        String message = String.format("Task: %s\nDescription: %s\nDue: %s",
+                task.getTitle(),
+                task.getDescription(),
+                sdf.format(task.getDueDate()));
+        showToast(message);
     }
 
     private void deleteTask(Task task) {
         taskList.remove(task);
         taskAdapter.notifyDataSetChanged();
-        Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
+        showToast("Task deleted");
     }
 
-    // Task model class
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
     public static class Task {
-        private String title;
-        private String description;
-        private Date dueDate;
+        private final String title;
+        private final String description;
+        private final Date dueDate;
 
         public Task(String title, String description, Date dueDate) {
             this.title = title;
@@ -159,16 +148,8 @@ public class MainActivity extends AppCompatActivity {
             this.dueDate = dueDate;
         }
 
-        public String getTitle() {
-            return title;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public Date getDueDate() {
-            return dueDate;
-        }
+        public String getTitle() { return title; }
+        public String getDescription() { return description; }
+        public Date getDueDate() { return dueDate; }
     }
 }
