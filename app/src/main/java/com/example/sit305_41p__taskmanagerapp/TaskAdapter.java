@@ -131,7 +131,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 task.setTitle(newTitle);
                 task.setDescription(newDescription);
                 task.setDueDate(editCalendar.getTime());
-                notifyItemChanged(position);
                 listener.onEditClick(task, position);
             });
 

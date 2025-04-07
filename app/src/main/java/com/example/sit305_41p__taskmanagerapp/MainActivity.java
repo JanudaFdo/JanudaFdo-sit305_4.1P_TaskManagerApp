@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -90,10 +91,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         Task newTask = new Task(title, description, selectedDate.getTime());
         taskList.add(newTask);
-        taskAdapter.notifyItemInserted(taskList.size() - 1);
-
+        sortTasksByDueDate();
         clearInputFields();
         showToast("Task created successfully");
+    }
+
+    private void sortTasksByDueDate() {
+        Collections.sort(taskList);
+        taskAdapter.notifyDataSetChanged();
     }
 
     private void clearInputFields() {
@@ -127,10 +132,11 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     @Override
     public void onEditClick(Task task, int position) {
+        sortTasksByDueDate();
         showToast("Task updated");
     }
 
-    public static class Task {
+    public static class Task implements Comparable<Task> {
         private String title;
         private String description;
         private Date dueDate;
@@ -148,5 +154,10 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         public void setTitle(String title) { this.title = title; }
         public void setDescription(String description) { this.description = description; }
         public void setDueDate(Date dueDate) { this.dueDate = dueDate; }
+
+        @Override
+        public int compareTo(Task other) {
+            return this.dueDate.compareTo(other.dueDate);
+        }
     }
 }
